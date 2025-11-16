@@ -4,7 +4,7 @@ import request from "supertest";
 import chatRouter from "./chat.js";
 import * as claudeService from "../services/claude.js";
 
-describe("POST /lookup", () => {
+describe("POST /chat", () => {
   let app: express.Application;
 
   beforeEach(() => {
@@ -19,7 +19,7 @@ describe("POST /lookup", () => {
 
   it("should return 400 if spanText is missing", async () => {
     const response = await request(app)
-      .post("/api/lookup")
+      .post("/api/chat")
       .send({ context: "some context" });
 
     expect(response.status).toBe(400);
@@ -28,7 +28,7 @@ describe("POST /lookup", () => {
 
   it("should return 400 if context is missing", async () => {
     const response = await request(app)
-      .post("/api/lookup")
+      .post("/api/chat")
       .send({ spanText: "term" });
 
     expect(response.status).toBe(400);
@@ -38,9 +38,9 @@ describe("POST /lookup", () => {
   it("should stream tokens when spanText and context are provided", async () => {
     const mockTokens = ["Hello", " ", "this", " is", " Claude"];
 
-    // Spy on streamLookup
-    const streamLookupSpy = vi.spyOn(claudeService, "streamLookup");
-    streamLookupSpy.mockImplementation(
+    // Spy on streamChat
+    const streamChatSpy = vi.spyOn(claudeService, "streamChat");
+    streamChatSpy.mockImplementation(
       async (
         spanText: string,
         context: string,
@@ -52,7 +52,7 @@ describe("POST /lookup", () => {
       }
     );
 
-    const response = await request(app).post("/api/lookup").send({
+    const response = await request(app).post("/api/chat").send({
       spanText: "chain-of-thought",
       context: "The model used chain-of-thought reasoning...",
     });
@@ -65,22 +65,22 @@ describe("POST /lookup", () => {
     expect(response.text).toContain('data: {"token":" "}');
     expect(response.text).toContain("[DONE]");
 
-    expect(streamLookupSpy).toHaveBeenCalledWith(
+    expect(streamChatSpy).toHaveBeenCalledWith(
       "chain-of-thought",
       "The model used chain-of-thought reasoning...",
       expect.any(Function)
     );
   });
 
-  it("should handle errors from streamLookup", async () => {
+  it("should handle errors from streamChat", async () => {
     const errorMsg = "API rate limit exceeded";
 
-    const streamLookupSpy = vi.spyOn(claudeService, "streamLookup");
-    streamLookupSpy.mockImplementation(async () => {
+    const streamChatSpy = vi.spyOn(claudeService, "streamChat");
+    streamChatSpy.mockImplementation(async () => {
       throw new Error(errorMsg);
     });
 
-    const response = await request(app).post("/api/lookup").send({
+    const response = await request(app).post("/api/chat").send({
       spanText: "term",
       context: "context",
     });
@@ -90,8 +90,8 @@ describe("POST /lookup", () => {
   });
 
   it("should accept and use messageId field", async () => {
-    const streamLookupSpy = vi.spyOn(claudeService, "streamLookup");
-    streamLookupSpy.mockImplementation(
+    const streamChatSpy = vi.spyOn(claudeService, "streamChat");
+    streamChatSpy.mockImplementation(
       async (
         spanText: string,
         context: string,
@@ -101,13 +101,13 @@ describe("POST /lookup", () => {
       }
     );
 
-    const response = await request(app).post("/api/lookup").send({
+    const response = await request(app).post("/api/chat").send({
       spanText: "term",
       context: "context",
       messageId: "msg_123",
     });
 
     expect(response.status).toBe(200);
-    expect(streamLookupSpy).toHaveBeenCalled();
+    expect(streamChatSpy).toHaveBeenCalled();
   });
 });
