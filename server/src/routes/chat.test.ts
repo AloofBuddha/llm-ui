@@ -2,7 +2,7 @@ import { describe, it, expect, beforeEach, afterEach, vi } from "vitest";
 import express from "express";
 import request from "supertest";
 import chatRouter from "./chat.js";
-import * as claudeService from "../services/claude.js";
+import * as grokService from "../services/xai.js";
 
 describe("POST /chat", () => {
   let app: express.Application;
@@ -36,10 +36,10 @@ describe("POST /chat", () => {
   });
 
   it("should stream tokens when spanText and context are provided", async () => {
-    const mockTokens = ["Hello", " ", "this", " is", " Claude"];
+    const mockTokens = ["Hello", " ", "this", " is", " Grok"];
 
     // Spy on streamChat
-    const streamChatSpy = vi.spyOn(claudeService, "streamChat");
+    const streamChatSpy = vi.spyOn(grokService, "streamChat");
     streamChatSpy.mockImplementation(
       async (
         spanText: string,
@@ -75,7 +75,7 @@ describe("POST /chat", () => {
   it("should handle errors from streamChat", async () => {
     const errorMsg = "API rate limit exceeded";
 
-    const streamChatSpy = vi.spyOn(claudeService, "streamChat");
+    const streamChatSpy = vi.spyOn(grokService, "streamChat");
     streamChatSpy.mockImplementation(async () => {
       throw new Error(errorMsg);
     });
@@ -90,7 +90,7 @@ describe("POST /chat", () => {
   });
 
   it("should accept and use messageId field", async () => {
-    const streamChatSpy = vi.spyOn(claudeService, "streamChat");
+    const streamChatSpy = vi.spyOn(grokService, "streamChat");
     streamChatSpy.mockImplementation(
       async (
         spanText: string,

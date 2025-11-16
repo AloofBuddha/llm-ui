@@ -1,0 +1,26 @@
+.message-bubble {
+  padding: 16px;
+  border-radius: 12px;
+  max-width: 70%;
+  word-wrap: break-word;
+  line-height: 1.5;
+}
+
+.message-bubble.assistant {
+  background: #e3f2fd;
+  color: #1565c0;
+  align-self: flex-start;
+  margin-right: auto;
+}
+
+.message-bubble.user {
+  background: #c8e6c9;
+  color: #2e7d32;
+  align-self: flex-end;
+  margin-left: auto;
+}
+
+.message-bubble p {
+  user-select: text;
+  cursor: text;
+}

@@ -1,5 +1,5 @@
 import express from "express";
-import { streamChat } from "../services/claude.js";
+import { streamChat } from "../services/xai.js";
 
 const chatRouter = express.Router();
 
