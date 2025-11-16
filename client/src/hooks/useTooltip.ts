@@ -50,13 +50,13 @@ const useTooltip = () => {
               if (data.token) {
                 accumulatedContent += data.token;
                 setTooltip((prev) =>
-                  prev ? { ...prev, content: accumulatedContent, loading: false } : null
+                  prev
+                    ? { ...prev, content: accumulatedContent, loading: false }
+                    : null
                 );
               } else if (data.error) {
                 setTooltip((prev) =>
-                  prev
-                    ? { ...prev, error: data.error, loading: false }
-                    : null
+                  prev ? { ...prev, error: data.error, loading: false } : null
                 );
               }
             } catch (e) {
@@ -71,9 +71,7 @@ const useTooltip = () => {
       if (error instanceof Error && error.name !== "AbortError") {
         console.error("Lookup failed:", error);
         setTooltip((prev) =>
-          prev
-            ? { ...prev, error: error.message, loading: false }
-            : null
+          prev ? { ...prev, error: error.message, loading: false } : null
         );
       }
     }

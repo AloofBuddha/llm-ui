@@ -1,8 +1,8 @@
-import React from 'react';
-import MessageBubble from './MessageBubble';
-import TooltipOverlay from './TooltipOverlay';
-import useTooltip from '../hooks/useTooltip';
-import { Message } from '../types';
+import React from "react";
+import MessageBubble from "./MessageBubble";
+import TooltipOverlay from "./TooltipOverlay";
+import useTooltip from "../hooks/useTooltip";
+import { Message } from "../types";
 
 interface ChatViewProps {
   messages: Message[];
@@ -21,11 +21,18 @@ const ChatView: React.FC<ChatViewProps> = ({ messages }) => {
   return (
     <div className="chat-view">
       {messages.map((message, index) => (
-        <MessageBubble key={index} message={message.text} onDoubleClick={handleDoubleClick} />
+        <MessageBubble
+          key={index}
+          message={message.text}
+          onDoubleClick={handleDoubleClick}
+        />
       ))}
       {isVisible && tooltip && (
         <TooltipOverlay
-          content={tooltip.content || (tooltip.loading ? "Loading..." : tooltip.error || "")}
+          content={
+            tooltip.content ||
+            (tooltip.loading ? "Loading..." : tooltip.error || "")
+          }
           isVisible={true}
           position={{ top: 100, left: 100 }}
           onClose={hideTooltip}
