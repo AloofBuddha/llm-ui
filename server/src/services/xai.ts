@@ -7,24 +7,16 @@ const client = new OpenAI({
 });
 
 export async function streamChat(
-  spanText: string,
-  context: string,
+  userMessage: string,
   onToken: (token: string) => void
 ): Promise<void> {
   const stream = await client.chat.completions.create({
-    model: "grok-4-fast",
-    max_tokens: 300,
+    model: "grok-4-fast-reasoning",
     stream: true,
     messages: [
       {
-        role: "system",
-        content: `You are a helpful assistant explaining technical terms concisely.
-Given a phrase, provide a 2-3 sentence explanation with optional sources.
-Be conversational and informative.`,
-      },
-      {
         role: "user",
-        content: `Explain this term: "${spanText}"\n\nContext: ${context}`,
+        content: userMessage,
       },
     ],
   });

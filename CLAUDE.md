@@ -4,12 +4,14 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-AI User Experience experiment featuring a chat interface with double-click tooltips. When users double-click phrases in chat messages, the app fetches contextual explanations from xAI's Grok API via server-sent events (SSE) streaming.
+Claude-inspired chat interface for interacting with xAI's Grok API. Features real-time streaming responses, markdown rendering, and a clean minimal design.
 
 **Tech Stack:**
-- Client: React 18 + TypeScript + Vite
+- Client: React 18 + TypeScript + Vite + react-markdown
 - Server: Express + TypeScript + xAI (Grok) API via OpenAI SDK
 - Communication: Server-Sent Events (SSE) for streaming responses
+
+**Note:** Double-click tooltip feature planned for future iteration.
 
 ## Development Commands
 
@@ -54,15 +56,15 @@ VITE_API_URL=http://localhost:3001
 
 ## Architecture
 
-### Request Flow: Double-Click to Tooltip
+### Request Flow: Chat Message to AI Response
 
-1. **User Interaction**: User double-clicks text in `MessageBubble.tsx`
-2. **Hook Activation**: `useTooltip.ts` calls `lookup(spanText, context)`
-3. **API Request**: POST to `/api/chat` with selected text and surrounding context
+1. **User Input**: User types message in `ChatInput.tsx`, presses Enter
+2. **Send Message**: `useChatAPI.ts` hook adds user message to state
+3. **API Request**: POST to `/api/chat` with message text (sent as both `spanText` and `context`)
 4. **SSE Stream**: `server/src/routes/chat.ts` opens SSE connection
 5. **xAI Integration**: `server/src/services/xai.ts` streams from Grok-4-fast model
-6. **Client Streaming**: `useTooltip.ts` reads SSE stream, accumulates tokens
-7. **UI Update**: `TooltipOverlay.tsx` displays streaming explanation
+6. **Client Streaming**: `useChatAPI.ts` reads SSE stream, accumulates tokens
+7. **UI Update**: `MessageBubble.tsx` displays streaming AI response with markdown rendering
 
 ### Key Files
 
@@ -73,11 +75,12 @@ VITE_API_URL=http://localhost:3001
 - `src/config/env.ts` - Environment variable loading
 
 **Client:**
-- `src/hooks/useTooltip.ts` - Tooltip state management, SSE parsing, abort handling
-- `src/hooks/useChat.ts` - Chat message state management
-- `src/components/TooltipOverlay.tsx` - Tooltip UI component
-- `src/components/MessageBubble.tsx` - Individual message with double-click handling
-- `src/components/ChatView.tsx` - Main chat interface
+- `src/hooks/useChatAPI.ts` - Chat state management, message sending, SSE streaming
+- `src/hooks/useTooltip.ts` - (Reserved for future popover feature)
+- `src/components/ChatInput.tsx` - Multiline textarea input with send button
+- `src/components/MessageBubble.tsx` - Individual message with user/AI styling, markdown rendering
+- `src/components/ChatView.tsx` - Main chat interface with empty/chat states
+- `src/App.tsx` - Minimal application wrapper
 
 ### Important Implementation Details
 
@@ -90,7 +93,17 @@ data: {"error": "message"}\n\n
 
 **xAI Service**: Uses OpenAI SDK with custom baseURL (`https://api.x.ai/v1`), model `grok-4-fast`, max 300 tokens per explanation
 
-**Abort Controllers**: Client-side tooltip lookups use AbortController to cancel in-flight requests when new lookups start
+**Chat Interface States**:
+- Empty state: Centered container with input (like Claude homepage)
+- Chat state: Messages scrollable area + fixed input at bottom
+
+**Markdown Rendering**: AI responses rendered with `react-markdown` + `remark-gfm` for GitHub-flavored markdown
+
+**Streaming UI**: Real-time token streaming with typing indicator animation during AI response
+
+**Input Handling**: Multiline textarea with auto-resize, Enter to send, Shift+Enter for new line
+
+**Abort Controllers**: Message requests use AbortController to cancel in-flight requests
 
 **Module System**: Both client and server use ES modules (`"type": "module"` in package.json)
 

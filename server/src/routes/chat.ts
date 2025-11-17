@@ -4,10 +4,10 @@ import { streamChat } from "../services/xai.js";
 const chatRouter = express.Router();
 
 chatRouter.post("/chat", async (req, res) => {
-  const { spanText, context } = req.body;
+  const { message } = req.body;
 
-  if (!spanText || !context) {
-    res.status(400).json({ error: "spanText and context required" });
+  if (!message) {
+    res.status(400).json({ error: "message required" });
     return;
   }
 
@@ -16,7 +16,7 @@ chatRouter.post("/chat", async (req, res) => {
   res.setHeader("Connection", "keep-alive");
 
   try {
-    await streamChat(spanText, context, (chunk) => {
+    await streamChat(message, (chunk) => {
       res.write(`data: ${JSON.stringify({ token: chunk })}\n\n`);
     });
     res.write("data: [DONE]\n\n");

@@ -17,33 +17,23 @@ describe("POST /chat", () => {
     vi.clearAllMocks();
   });
 
-  it("should return 400 if spanText is missing", async () => {
+  it("should return 400 if message is missing", async () => {
     const response = await request(app)
       .post("/api/chat")
-      .send({ context: "some context" });
+      .send({});
 
     expect(response.status).toBe(400);
-    expect(response.body.error).toBe("spanText and context required");
+    expect(response.body.error).toBe("message required");
   });
 
-  it("should return 400 if context is missing", async () => {
-    const response = await request(app)
-      .post("/api/chat")
-      .send({ spanText: "term" });
-
-    expect(response.status).toBe(400);
-    expect(response.body.error).toBe("spanText and context required");
-  });
-
-  it("should stream tokens when spanText and context are provided", async () => {
+  it("should stream tokens when message is provided", async () => {
     const mockTokens = ["Hello", " ", "this", " is", " Grok"];
 
     // Spy on streamChat
     const streamChatSpy = vi.spyOn(grokService, "streamChat");
     streamChatSpy.mockImplementation(
       async (
-        spanText: string,
-        context: string,
+        message: string,
         onToken: (t: string) => void
       ) => {
         for (const token of mockTokens) {
@@ -53,8 +43,7 @@ describe("POST /chat", () => {
     );
 
     const response = await request(app).post("/api/chat").send({
-      spanText: "chain-of-thought",
-      context: "The model used chain-of-thought reasoning...",
+      message: "What is a dog?",
     });
 
     expect(response.status).toBe(200);
@@ -66,8 +55,7 @@ describe("POST /chat", () => {
     expect(response.text).toContain("[DONE]");
 
     expect(streamChatSpy).toHaveBeenCalledWith(
-      "chain-of-thought",
-      "The model used chain-of-thought reasoning...",
+      "What is a dog?",
       expect.any(Function)
     );
   });
@@ -81,33 +69,10 @@ describe("POST /chat", () => {
     });
 
     const response = await request(app).post("/api/chat").send({
-      spanText: "term",
-      context: "context",
+      message: "Hello",
     });
 
     expect(response.status).toBe(200); // SSE still returns 200
     expect(response.text).toContain(`"error":"${errorMsg}"`);
-  });
-
-  it("should accept and use messageId field", async () => {
-    const streamChatSpy = vi.spyOn(grokService, "streamChat");
-    streamChatSpy.mockImplementation(
-      async (
-        spanText: string,
-        context: string,
-        onToken: (t: string) => void
-      ) => {
-        onToken("response");
-      }
-    );
-
-    const response = await request(app).post("/api/chat").send({
-      spanText: "term",
-      context: "context",
-      messageId: "msg_123",
-    });
-
-    expect(response.status).toBe(200);
-    expect(streamChatSpy).toHaveBeenCalled();
   });
 });

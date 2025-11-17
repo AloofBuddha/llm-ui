@@ -1,4 +1,4 @@
-import { describe, it, expect, beforeAll, afterAll } from "vitest";
+import { describe, it, expect, beforeAll } from "vitest";
 import express from "express";
 import request from "supertest";
 import chatRouter from "./chat.js";
@@ -13,10 +13,11 @@ describe("POST /chat - Integration Test with Grok", () => {
   });
 
   it("should successfully stream a response from Grok", async () => {
-    const response = await request(app).post("/api/chat").send({
-      spanText: "recursion",
-      context: "In programming, recursion is when a function calls itself.",
-    });
+    const response = await request(app)
+      .post("/api/chat")
+      .send({
+        message: "What is recursion in programming?",
+      });
 
     expect(response.status).toBe(200);
     expect(response.type).toBe("text/event-stream");
@@ -39,11 +40,10 @@ describe("POST /chat - Integration Test with Grok", () => {
 
   it("should handle missing parameters gracefully", async () => {
     const response = await request(app).post("/api/chat").send({
-      spanText: "test",
-      // missing context
+      // missing message
     });
 
     expect(response.status).toBe(400);
-    expect(response.body.error).toBe("spanText and context required");
+    expect(response.body.error).toBe("message required");
   });
 });

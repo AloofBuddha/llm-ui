@@ -54,7 +54,7 @@ describe("XAI/Grok Service", () => {
       clientMock.chat.completions.create as ReturnType<typeof vi.fn>
     ).mockResolvedValue(mockAsyncIterator);
 
-    await streamChat("test-term", "test context", mockOnToken);
+    await streamChat("What is a dog?", mockOnToken);
 
     // Verify onToken was called 3 times (for each chunk with content)
     expect(mockOnToken).toHaveBeenCalledTimes(3);
@@ -76,8 +76,7 @@ describe("XAI/Grok Service", () => {
     ).mockResolvedValue(mockAsyncIterator);
 
     await streamChat(
-      "chain-of-thought",
-      "This is a context about reasoning.",
+      "What is chain-of-thought reasoning?",
       mockOnToken
     );
 
@@ -85,18 +84,15 @@ describe("XAI/Grok Service", () => {
       clientMock.chat.completions.create as ReturnType<typeof vi.fn>
     ).mock.calls[0][0];
 
-    expect(callArgs.model).toBe("grok-4-fast");
-    expect(callArgs.max_tokens).toBe(300);
+    expect(callArgs.model).toBe("grok-4-fast-reasoning");
+    expect(callArgs.max_tokens).toBeUndefined(); // No token limit
     expect(callArgs.stream).toBe(true);
-    expect(callArgs.messages[0].role).toBe("system");
-    expect(callArgs.messages[1].role).toBe("user");
-    expect(callArgs.messages[1].content).toContain("chain-of-thought");
-    expect(callArgs.messages[1].content).toContain(
-      "This is a context about reasoning."
-    );
+    expect(callArgs.messages).toHaveLength(1); // Only user message, no system prompt
+    expect(callArgs.messages[0].role).toBe("user");
+    expect(callArgs.messages[0].content).toBe("What is chain-of-thought reasoning?");
   });
 
-  it("should have proper system prompt", async () => {
+  it("should not include a system prompt for default Grok behavior", async () => {
     const mockAsyncIterator = {
       [Symbol.asyncIterator]: async function* () {
         yield { choices: [{ delta: {} }] };
@@ -108,14 +104,15 @@ describe("XAI/Grok Service", () => {
       clientMock.chat.completions.create as ReturnType<typeof vi.fn>
     ).mockResolvedValue(mockAsyncIterator);
 
-    await streamChat("term", "context", mockOnToken);
+    await streamChat("Tell me about dogs", mockOnToken);
 
     const callArgs = (
       clientMock.chat.completions.create as ReturnType<typeof vi.fn>
     ).mock.calls[0][0];
 
-    expect(callArgs.messages[0].role).toBe("system");
-    expect(callArgs.messages[0].content).toContain("technical terms");
-    expect(callArgs.messages[0].content).toContain("2-3 sentence explanation");
+    // No system message - just the user message
+    expect(callArgs.messages).toHaveLength(1);
+    expect(callArgs.messages[0].role).toBe("user");
+    expect(callArgs.messages[0].content).toBe("Tell me about dogs");
   });
 });
