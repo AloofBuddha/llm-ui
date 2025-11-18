@@ -7,6 +7,8 @@ interface UseChatAPIReturn {
   isLoading: boolean;
   error: string | null;
   clearError: () => void;
+  resetMessages: () => void;
+  loadMessages: (msgs: Message[]) => void;
 }
 
 const useChatAPI = (): UseChatAPIReturn => {
@@ -17,6 +19,18 @@ const useChatAPI = (): UseChatAPIReturn => {
 
   const clearError = useCallback(() => {
     setError(null);
+  }, []);
+
+  const resetMessages = useCallback(() => {
+    setMessages([]);
+    setError(null);
+    setIsLoading(false);
+  }, []);
+
+  const loadMessages = useCallback((msgs: Message[]) => {
+    setMessages(msgs);
+    setError(null);
+    setIsLoading(false);
   }, []);
 
   const sendMessage = useCallback(async (text: string) => {
@@ -70,6 +84,8 @@ const useChatAPI = (): UseChatAPIReturn => {
       const decoder = new TextDecoder();
       let buffer = "";
       let accumulatedContent = "";
+      let lastUpdateTime = Date.now();
+      const UPDATE_INTERVAL = 100; // Update UI every 100ms
 
       while (true) {
         const { done, value } = await reader.read();
@@ -92,30 +108,39 @@ const useChatAPI = (): UseChatAPIReturn => {
               const data = JSON.parse(dataStr);
               if (data.token) {
                 accumulatedContent += data.token;
-                // Update the AI message with accumulated content
-                setMessages((prev) =>
-                  prev.map((msg) =>
-                    msg.id === aiMessageId
-                      ? { ...msg, text: accumulatedContent }
-                      : msg
-                  )
-                );
+
+                // Throttle updates to avoid breaking LaTeX rendering
+                const now = Date.now();
+                if (now - lastUpdateTime >= UPDATE_INTERVAL) {
+                  setMessages((prev) =>
+                    prev.map((msg) =>
+                      msg.id === aiMessageId
+                        ? { ...msg, text: accumulatedContent }
+                        : msg
+                    )
+                  );
+                  lastUpdateTime = now;
+                }
               } else if (data.error) {
                 throw new Error(data.error);
               }
             } catch (e) {
-              if (e instanceof Error) {
-                console.error("Parse error:", e);
-              }
+              // Silently ignore parse errors for incomplete chunks
             }
           }
         }
       }
 
+      // Final update with all content
+      setMessages((prev) =>
+        prev.map((msg) =>
+          msg.id === aiMessageId ? { ...msg, text: accumulatedContent } : msg
+        )
+      );
+
       setIsLoading(false);
     } catch (err) {
       if (err instanceof Error && err.name !== "AbortError") {
-        console.error("Send message failed:", err);
         setError(err.message);
         // Remove the failed AI message
         setMessages((prev) => prev.filter((msg) => msg.id !== aiMessageId));
@@ -130,6 +155,8 @@ const useChatAPI = (): UseChatAPIReturn => {
     isLoading,
     error,
     clearError,
+    resetMessages,
+    loadMessages,
   };
 };
 

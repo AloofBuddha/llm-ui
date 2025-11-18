@@ -47,6 +47,7 @@ const ChatInput: React.FC<ChatInputProps> = ({
     <div className="chat-input-container">
       <div className="chat-input-wrapper">
         <textarea
+          name="chat-input"
           ref={textareaRef}
           className="chat-input"
           value={input}
@@ -72,7 +73,7 @@ const ChatInput: React.FC<ChatInputProps> = ({
             strokeLinecap="round"
             strokeLinejoin="round"
           >
-            <path d="M5 12h14M12 5l7 7-7 7" />
+            <path d="M12 19V5M5 12l7-7 7 7" />
           </svg>
         </button>
       </div>

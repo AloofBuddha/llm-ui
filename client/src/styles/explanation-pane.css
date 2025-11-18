@@ -1,0 +1,415 @@
+/* Explanation Pane - Right Side Panel */
+
+/* Update chat view to be a flex container */
+.chat-view {
+  display: flex;
+  height: 100vh;
+  width: 100vw;
+  overflow: hidden; /* Prevent view scroll */
+  animation: fadeIn 0.3s ease-in;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+.chat-main {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  min-width: 0; /* Allows flex item to shrink below content size */
+  position: relative; /* For absolute positioning of .chat-input-fixed */
+  overflow: hidden; /* Prevent main area scroll */
+}
+
+/* Transitioning in animation for chat state */
+.chat-main.transitioning .messages-container {
+  animation: fadeInMessages 0.6s ease-out;
+}
+
+@keyframes fadeInMessages {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+/* Explanation Pane */
+.explanation-pane {
+  width: 400px; /* Always reserve space */
+  height: 100vh;
+  background: #2d2d2d;
+  border-left: 1px solid #3d3d3d;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  opacity: 0; /* Hidden by default */
+  pointer-events: none; /* Disable interactions when hidden */
+  transition: opacity 0.3s ease;
+}
+
+.explanation-pane.active {
+  opacity: 1;
+  pointer-events: auto; /* Enable interactions when visible */
+}
+
+/* Empty state when no selection */
+.explanation-empty {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  padding: 32px;
+  text-align: center;
+  color: #999;
+}
+
+.explanation-empty p {
+  font-size: 14px;
+  line-height: 1.6;
+}
+
+/* Header */
+.explanation-header {
+  padding: 16px;
+  border-bottom: 1px solid #3d3d3d;
+  background: #252525;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.explanation-selected-text {
+  font-weight: 600;
+  color: #e8e8e8;
+  font-size: 14px;
+  word-wrap: break-word;
+  flex: 1;
+}
+
+.explanation-close-button {
+  background: none;
+  border: none;
+  color: #999;
+  font-size: 20px;
+  cursor: pointer;
+  padding: 4px 8px;
+  line-height: 1;
+  transition: color 0.2s;
+  flex-shrink: 0;
+}
+
+.explanation-close-button:hover {
+  color: #e8e8e8;
+}
+
+/* Tab Navigation */
+.explanation-tabs {
+  display: flex;
+  border-bottom: 1px solid #3d3d3d;
+  background: #2d2d2d;
+}
+
+.explanation-tab {
+  flex: 1;
+  padding: 12px 16px;
+  background: none;
+  border: none;
+  color: #999;
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s;
+  border-bottom: 2px solid transparent;
+}
+
+.explanation-tab:hover {
+  color: #e8e8e8;
+  background: #323232;
+}
+
+.explanation-tab.active {
+  color: #ff6b4a;
+  border-bottom-color: #ff6b4a;
+}
+
+/* Body */
+.explanation-body {
+  padding: 16px;
+  overflow-y: auto;
+  flex: 1;
+  color: #e8e8e8;
+  font-size: 14px;
+  line-height: 1.6;
+}
+
+/* Loading State */
+.explanation-loading {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 32px;
+  color: #999;
+}
+
+.explanation-loading .spinner {
+  width: 24px;
+  height: 24px;
+  border: 3px solid #3d3d3d;
+  border-top-color: #ff6b4a;
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+  margin-bottom: 12px;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.explanation-loading p {
+  font-size: 13px;
+  margin: 0;
+}
+
+/* Error State */
+.explanation-error {
+  padding: 20px;
+  color: #ff6b6b;
+  text-align: center;
+  font-size: 13px;
+}
+
+/* Empty State */
+.explanation-empty-state {
+  padding: 20px;
+  color: #999;
+  text-align: center;
+  font-size: 13px;
+  font-style: italic;
+}
+
+/* Dictionary Content */
+.dictionary-content {
+  font-size: 14px;
+}
+
+.dictionary-word {
+  margin-bottom: 16px;
+  padding-bottom: 12px;
+  border-bottom: 1px solid #3d3d3d;
+}
+
+.dictionary-word strong {
+  font-size: 18px;
+  color: #e8e8e8;
+  margin-right: 8px;
+}
+
+.phonetic {
+  color: #999;
+  font-style: italic;
+  font-size: 13px;
+}
+
+.dictionary-meaning {
+  margin-bottom: 16px;
+}
+
+.part-of-speech {
+  font-style: italic;
+  color: #ff6b4a;
+  font-size: 12px;
+  font-weight: 600;
+  text-transform: uppercase;
+  margin-bottom: 8px;
+  letter-spacing: 0.5px;
+}
+
+.dictionary-meaning ol {
+  margin: 0;
+  padding-left: 20px;
+}
+
+.dictionary-meaning li {
+  margin-bottom: 12px;
+}
+
+.definition {
+  color: #e8e8e8;
+  line-height: 1.5;
+}
+
+.example {
+  color: #999;
+  font-style: italic;
+  margin-top: 6px;
+  font-size: 13px;
+}
+
+/* Wikipedia Content */
+.wikipedia-content {
+  font-size: 14px;
+}
+
+.wikipedia-title {
+  font-size: 18px;
+  font-weight: 600;
+  color: #e8e8e8;
+  margin: 0 0 12px 0;
+}
+
+.wikipedia-thumbnail {
+  width: 100%;
+  max-height: 200px;
+  object-fit: cover;
+  border-radius: 6px;
+  margin-bottom: 12px;
+}
+
+.wikipedia-extract {
+  color: #e8e8e8;
+  line-height: 1.6;
+  margin: 0 0 12px 0;
+}
+
+.wikipedia-link {
+  display: inline-flex;
+  align-items: center;
+  color: #ff6b4a;
+  text-decoration: none;
+  font-size: 13px;
+  font-weight: 500;
+  transition: opacity 0.2s;
+}
+
+.wikipedia-link:hover {
+  opacity: 0.8;
+  text-decoration: underline;
+}
+
+/* AI Content */
+.ai-content {
+  font-size: 14px;
+  line-height: 1.6;
+}
+
+.ai-content p {
+  margin: 0 0 12px 0;
+  color: #e8e8e8;
+}
+
+.ai-content p:last-child {
+  margin-bottom: 0;
+}
+
+.ai-content strong {
+  color: #fff;
+}
+
+.ai-content em {
+  color: #ccc;
+}
+
+.ai-content code {
+  background: #1a1a1a;
+  padding: 2px 6px;
+  border-radius: 3px;
+  font-family: "Courier New", monospace;
+  font-size: 13px;
+  color: #ff6b4a;
+}
+
+.ai-content pre {
+  background: #1a1a1a;
+  padding: 12px;
+  border-radius: 6px;
+  overflow-x: auto;
+  margin: 12px 0;
+}
+
+.ai-content pre code {
+  background: none;
+  padding: 0;
+  color: #e8e8e8;
+}
+
+.ai-content ul,
+.ai-content ol {
+  margin: 0 0 12px 0;
+  padding-left: 24px;
+}
+
+.ai-content li {
+  margin-bottom: 6px;
+}
+
+.typing-indicator {
+  color: #ff6b4a;
+  animation: blink 1s infinite;
+  margin-left: 2px;
+}
+
+@keyframes blink {
+  0%,
+  49% {
+    opacity: 1;
+  }
+  50%,
+  100% {
+    opacity: 0;
+  }
+}
+
+/* KaTeX styling for explanation pane AI content */
+.ai-content .katex {
+  color: #e8e8e8;
+  font-size: 1em;
+}
+
+.ai-content .katex-display {
+  margin: 0.8em 0;
+  overflow-x: auto;
+  overflow-y: hidden;
+}
+
+.ai-content .katex-display::-webkit-scrollbar {
+  height: 4px;
+}
+
+.ai-content .katex-display::-webkit-scrollbar-track {
+  background: #1a1a1a;
+}
+
+.ai-content .katex-display::-webkit-scrollbar-thumb {
+  background: #4d4d4d;
+  border-radius: 2px;
+}
+
+/* Scrollbar Styling */
+.explanation-body::-webkit-scrollbar {
+  width: 6px;
+}
+
+.explanation-body::-webkit-scrollbar-track {
+  background: #2d2d2d;
+}
+
+.explanation-body::-webkit-scrollbar-thumb {
+  background: #4d4d4d;
+  border-radius: 3px;
+}
+
+.explanation-body::-webkit-scrollbar-thumb:hover {
+  background: #5d5d5d;
+}
