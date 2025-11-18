@@ -3,7 +3,7 @@ import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 import remarkMath from "remark-math";
 import rehypeKatex from "rehype-katex";
-import type { UsePopoverReturn, TabType } from "../hooks/usePopover";
+import type { UsePopoverReturn } from "../hooks/usePopover";
 
 interface EnhancedPopoverProps {
   popover: UsePopoverReturn;
@@ -95,7 +95,7 @@ const EnhancedPopover: React.FC<EnhancedPopoverProps> = ({ popover }) => {
 
 // Dictionary Tab Component
 const DictionaryTab: React.FC<{
-  data: { data: any; loading: boolean; error: string | null };
+  data: { data: DictionaryEntry[] | null; loading: boolean; error: string | null };
 }> = ({ data }) => {
   if (data.loading) {
     return (
@@ -122,14 +122,14 @@ const DictionaryTab: React.FC<{
         <strong>{entry.word}</strong>
         {entry.phonetic && <span className="phonetic">{entry.phonetic}</span>}
       </div>
-      {entry.meanings.map((meaning: any, idx: number) => (
+      {entry.meanings.map((meaning, idx: number) => (
         <div key={idx} className="dictionary-meaning">
           <div className="part-of-speech">{meaning.partOfSpeech}</div>
           <ol>
-            {meaning.definitions.slice(0, 3).map((def: any, defIdx: number) => (
+            {meaning.definitions.slice(0, 3).map((def, defIdx: number) => (
               <li key={defIdx}>
                 <div className="definition">{def.definition}</div>
-                {def.example && <div className="example">"{def.example}"</div>}
+                {def.example && <div className="example">&ldquo;{def.example}&rdquo;</div>}
               </li>
             ))}
           </ol>
@@ -141,7 +141,7 @@ const DictionaryTab: React.FC<{
 
 // Wikipedia Tab Component
 const WikipediaTab: React.FC<{
-  data: { data: any; loading: boolean; error: string | null };
+  data: { data: WikipediaData | null; loading: boolean; error: string | null };
 }> = ({ data }) => {
   if (data.loading) {
     return (
@@ -218,5 +218,29 @@ const AITab: React.FC<{
     </div>
   );
 };
+
+// Type definitions
+interface DictionaryEntry {
+  word: string;
+  phonetic?: string;
+  meanings: Array<{
+    partOfSpeech: string;
+    definitions: Array<{
+      definition: string;
+      example?: string;
+    }>;
+  }>;
+}
+
+interface WikipediaData {
+  title: string;
+  extract: string;
+  thumbnail?: {
+    source: string;
+    width: number;
+    height: number;
+  };
+  pageUrl: string;
+}
 
 export default EnhancedPopover;

@@ -9,6 +9,7 @@ export function fixLatex(text: string): string {
   const protectedRanges: Array<{start: number; end: number}> = [];
 
   // Find all $...$ and $$...$$ blocks
+  // eslint-disable-next-line no-useless-escape
   const dollarRegex = /(\$\$[\s\S]*?\$\$|\$[^\$\n]+?\$)/g;
   let match;
   while ((match = dollarRegex.exec(text)) !== null) {

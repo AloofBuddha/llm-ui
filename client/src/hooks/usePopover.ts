@@ -57,6 +57,7 @@ export interface UsePopoverReturn {
   showPopover: (text: string, context: string, pos: Position) => void;
   hidePopover: () => void;
   switchTab: (tab: TabType) => void;
+  updateSearchText: (text: string) => void;
 }
 
 const API_BASE_URL = import.meta.env.VITE_API_URL || "http://localhost:3001";
@@ -120,6 +121,7 @@ export const usePopover = (): UsePopoverReturn => {
       const decoder = new TextDecoder();
       let accumulatedData = "";
 
+      // eslint-disable-next-line no-constant-condition
       while (true) {
         const { done, value } = await reader.read();
         if (done) break;
@@ -205,9 +207,6 @@ export const usePopover = (): UsePopoverReturn => {
         wikipedia: { data: result, loading: false, error: null },
       }));
     } catch (error) {
-      const wordCount = text.trim().split(/\s+/).length;
-      const isMultiWord = wordCount > 1;
-
       setTabData((prev) => ({
         ...prev,
         wikipedia: {
@@ -324,6 +323,30 @@ export const usePopover = (): UsePopoverReturn => {
     [selectedText, context, tabData, fetchDictionary, fetchWikipedia, fetchAI]
   );
 
+  // Update search text and re-fetch current tab
+  const updateSearchText = useCallback(
+    (text: string) => {
+      setSelectedText(text);
+
+      // Reset all tab data
+      setTabData({
+        dictionary: { data: null, loading: false, error: null },
+        wikipedia: { data: null, loading: false, error: null },
+        ai: { data: "", loading: false, error: null },
+      });
+
+      // Re-fetch the currently active tab
+      if (activeTab === "dictionary") {
+        fetchDictionary(text, context);
+      } else if (activeTab === "wikipedia") {
+        fetchWikipedia(text, context);
+      } else if (activeTab === "ai") {
+        fetchAI(text, context);
+      }
+    },
+    [activeTab, context, fetchDictionary, fetchWikipedia, fetchAI]
+  );
+
   return {
     isVisible,
     selectedText,
@@ -333,5 +356,6 @@ export const usePopover = (): UsePopoverReturn => {
     showPopover,
     hidePopover,
     switchTab,
+    updateSearchText,
   };
 };

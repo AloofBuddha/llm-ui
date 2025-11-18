@@ -1,96 +1,379 @@
-# AI User Experience Double Click Project
+# LLM UI - Chat Interface with Contextual Explanations
 
-## Overview
+A Claude-inspired chat interface for interacting with xAI's Grok API, featuring real-time streaming responses and an innovative explanation pane for contextual lookups.
 
-This project is designed to enhance user interaction with AI-generated responses by allowing users to double-click on phrases within the chat interface. When a phrase is double-clicked, a tooltip will appear, providing additional information fetched from the server.
+[![TypeScript](https://img.shields.io/badge/TypeScript-5.2-blue)](https://www.typescriptlang.org/)
+[![React](https://img.shields.io/badge/React-18.3-blue)](https://reactjs.org/)
+[![Express](https://img.shields.io/badge/Express-4.21-green)](https://expressjs.com/)
+[![License](https://img.shields.io/badge/license-MIT-green)](LICENSE)
 
-## Project Structure
+## ✨ Features
 
-The project is divided into two main parts: the client and the server.
+### 💬 Real-Time Streaming Chat
+- Server-Sent Events (SSE) for token-by-token streaming
+- Markdown rendering with GitHub-flavored syntax
+- LaTeX math equation support via KaTeX
+- User-controlled scrolling (no auto-scroll during streaming)
+
+### 🔍 Explanation Pane
+- **Select text** from chat messages to get instant explanations
+- **Three sources**: Dictionary, Wikipedia, and AI-powered explanations
+- **Smart defaults**: Single words use Dictionary, phrases use Wikipedia
+- **Nested selection**: Select text within explanations for deeper exploration
+- **Editable search**: Manual search with 100-character limit and debouncing
+
+### 💾 Chat Management
+- Multiple conversation support
+- Persistent history via localStorage
+- Quick switching between chats
+- Auto-save functionality
+
+### 🎨 Modern UI
+- Dark theme inspired by Claude
+- Smooth transitions and animations
+- Clean, minimal design
+- Three-column layout (chat list, messages, explanations)
+
+## 🚀 Quick Start
+
+### Prerequisites
+- Node.js 18+ and npm
+- xAI API key ([Get one here](https://console.x.ai/))
+
+### Installation
+
+1. **Clone the repository**
+   ```bash
+   git clone <repository-url>
+   cd llm-ui
+   ```
+
+2. **Install dependencies**
+   ```bash
+   # Install both client and server dependencies
+   cd client && npm install
+   cd ../server && npm install
+   ```
+
+3. **Set up environment variables**
+
+   **Server** (`server/.env`):
+   ```bash
+   XAI_API_KEY=your_xai_api_key_here
+   PORT=3001
+   ```
+
+   **Client** (`client/.env`):
+   ```bash
+   VITE_API_URL=http://localhost:3001
+   ```
+
+4. **Start development servers**
+
+   **Terminal 1 - Backend**:
+   ```bash
+   cd server
+   npm run dev
+   ```
+
+   **Terminal 2 - Frontend**:
+   ```bash
+   cd client
+   npm run dev
+   ```
+
+5. **Open the app**
+
+   Visit [http://localhost:5173](http://localhost:5173) in your browser
+
+## 📁 Project Structure
+
+```
+llm-ui/
+├── client/                      # React frontend (Vite)
+│   ├── src/
+│   │   ├── components/         # React components
+│   │   │   ├── ChatView.tsx           # Main app layout
+│   │   │   ├── MessageBubble.tsx      # Chat messages
+│   │   │   ├── ChatInput.tsx          # Message input
+│   │   │   ├── ExplanationPane.tsx    # Right-side lookup pane
+│   │   │   └── LeftPane.tsx           # Chat history sidebar
+│   │   ├── hooks/              # Custom React hooks
+│   │   │   ├── useChatAPI.ts          # Chat logic + SSE streaming
+│   │   │   ├── usePopover.ts          # Explanation pane logic
+│   │   │   └── useChatManager.ts      # Chat history management
+│   │   ├── styles/             # CSS files
+│   │   ├── utils/              # Utility functions
+│   │   └── types.ts            # TypeScript types
+│   └── package.json
+│
+├── server/                      # Express backend
+│   ├── src/
+│   │   ├── routes/
+│   │   │   └── chat.ts                # API endpoints (/api/chat, /api/explain)
+│   │   ├── services/
+│   │   │   └── xai.ts                 # xAI Grok integration
+│   │   ├── config/
+│   │   │   └── env.ts                 # Environment config
+│   │   └── index.ts                   # Express server setup
+│   └── package.json
+│
+├── memory-bank/                 # Project documentation for context
+│   ├── project-overview.md            # High-level overview
+│   ├── architecture.md                # System architecture
+│   ├── feature-details.md             # Implementation details
+│   └── quick-reference.md             # Quick reference guide
+│
+├── CLAUDE.md                    # Instructions for Claude Code
+├── DEPLOYMENT.md                # Deployment guide (Vercel + Railway)
+└── README.md                    # This file
+```
+
+## 🎯 Usage
+
+### Basic Chat
+1. Type your message in the input box
+2. Press Enter or click the send button
+3. Watch the AI response stream in real-time
+
+### Explanation Lookup
+1. **Select text** in any AI response
+2. The explanation pane opens automatically
+3. View results from Dictionary, Wikipedia, or AI
+4. **Select text within explanations** to dig deeper
+5. **Edit the search** to look up custom terms
+
+### Managing Conversations
+1. Click the **[+]** button to start a new chat
+2. Click on any previous chat to switch to it
+3. All conversations auto-save to your browser
+
+## 🛠️ Development
+
+### Available Scripts
+
+#### Client
+```bash
+npm run dev        # Start Vite dev server
+npm run build      # Build for production
+npm run preview    # Preview production build
+npm run lint       # Run ESLint
+npm run lint:fix   # Fix linting errors
+```
+
+#### Server
+```bash
+npm run dev        # Start with hot-reload (tsx)
+npm run build      # Compile TypeScript
+npm start          # Run production build
+npm run test       # Run tests in watch mode
+npm run test:run   # Run tests once
+npm run test:ui    # Run tests with UI
+npm run lint       # Run ESLint
+npm run lint:fix   # Fix linting errors
+```
+
+### Tech Stack
+
+**Frontend**
+- React 18 with TypeScript
+- Vite (build tool)
+- react-markdown + remark-gfm
+- KaTeX (LaTeX rendering)
+- Pure CSS (no framework)
+
+**Backend**
+- Express + TypeScript
+- OpenAI SDK (for xAI API)
+- Server-Sent Events (SSE)
+- Vitest (testing)
+
+## 🚢 Deployment
+
+### Option 1: Vercel All-in-One (Recommended) ⚡
+
+Deploy **both frontend and backend** to Vercel using serverless functions. **Zero cost, zero config!**
+
+See **[VERCEL_DEPLOYMENT.md](VERCEL_DEPLOYMENT.md)** for detailed instructions.
+
+**Quick Deploy**:
+1. Push to GitHub
+2. Import to Vercel
+3. Add `XAI_API_KEY` environment variable
+4. Deploy! ✨
+
+**Benefits**:
+- Everything in one place
+- Free tier (100GB-hrs/month)
+- SSE streaming supported
+- Global edge network
+
+### Option 2: Vercel + Railway (Traditional)
+
+Deploy frontend to Vercel and backend to Railway separately.
+
+See **[DEPLOYMENT.md](DEPLOYMENT.md)** for detailed instructions.
+
+**Quick Deploy**:
+
+1. **Backend to Railway**:
+   - Connect GitHub repo
+   - Set root directory: `server`
+   - Add `XAI_API_KEY` environment variable
+   - Deploy
+
+2. **Frontend to Vercel**:
+   - Connect GitHub repo
+   - Set root directory: `client`
+   - Add `VITE_API_URL` with Railway URL
+   - Deploy
+
+**Note**: Railway no longer offers a free tier.
+
+## 🧪 Testing
+
+Server includes comprehensive tests:
+
+```bash
+cd server
+npm run test:run     # Run all tests
+npm run test:ui      # Run with UI
+```
+
+Current test coverage:
+- ✅ xAI service integration
+- ✅ Chat route handlers
+- ✅ SSE streaming
+- ✅ Error handling
+
+## 📖 API Documentation
+
+### POST /api/chat
+Main chat endpoint with streaming responses.
+
+**Request**:
+```json
+{
+  "message": "Explain quantum computing"
+}
+```
+
+**Response**: SSE stream
+```
+data: {"token": "Quantum"}
+
+data: {"token": " computing"}
+
+data: [DONE]
+```
+
+### POST /api/explain
+Contextual explanation endpoint.
+
+**Request**:
+```json
+{
+  "spanText": "quantum entanglement",
+  "context": "In quantum computing, quantum entanglement..."
+}
+```
+
+**Response**: SSE stream (same format as /api/chat)
+
+## 🎨 Customization
+
+### Changing the AI Model
+
+Edit `server/src/services/xai.ts`:
+```typescript
+const completion = await openai.chat.completions.create({
+  model: "grok-4-fast",  // Change this
+  messages,
+  stream: true,
+  max_tokens: 300,       // Adjust as needed
+});
+```
+
+### Styling
+
+All styles are in `client/src/styles/`:
+- `app.css` - Main layout and chat
+- `explanation-pane.css` - Right panel
+- `left-pane.css` - Chat history
+- `message.css` - Message bubbles
+
+### Adding New Explanation Sources
+
+1. Add new tab in `client/src/components/ExplanationPane.tsx`
+2. Add fetch function in `client/src/hooks/usePopover.ts`
+3. Update tab data structure
+
+## 🔐 Environment Variables
 
 ### Client
-
-The client is a React application that handles the user interface and interactions.
-
-- **src/index.tsx**: Entry point for the React application.
-- **src/App.tsx**: Main application component that integrates the chat view.
-- **src/components**: Contains various components:
-  - **ChatView.tsx**: Displays chat messages and handles user interactions.
-  - **MessageBubble.tsx**: Represents individual chat messages.
-  - **DoubleClickHandler.tsx**: Manages double-click events and communicates with the tooltip.
-  - **TooltipOverlay.tsx**: Displays additional information when a phrase is double-clicked.
-- **src/hooks**: Custom hooks for managing state and interactions.
-  - **useChat.ts**: Manages chat state and server interactions.
-  - **useTooltip.ts**: Manages tooltip visibility and content.
-- **src/styles/app.css**: CSS styles for the application.
-- **src/types/index.ts**: TypeScript interfaces and types used in the client.
+| Variable | Description | Default |
+|----------|-------------|---------|
+| `VITE_API_URL` | Backend API URL | `http://localhost:3001` |
 
 ### Server
+| Variable | Description | Required |
+|----------|-------------|----------|
+| `XAI_API_KEY` | xAI API key | ✅ Yes |
+| `PORT` | Server port | No (defaults to 3001) |
+| `NODE_ENV` | Environment | No (defaults to development) |
 
-The server is built with Express and handles API requests to xAI's Grok via the OpenAI SDK (xAI API is OpenAI-compatible).
+## 🐛 Troubleshooting
 
-- **src/index.ts**: Entry point for the server application with Express setup and CORS configuration.
-- **src/routes/chat.ts**: Route handler for the `/api/chat` endpoint with Server-Sent Events (SSE) streaming.
-- **src/services/xai.ts**: Functions to interact with the xAI Grok API via OpenAI SDK, including the `streamChat` function.
-- **src/types/index.ts**: TypeScript interfaces and types used in the server.
+### Streaming doesn't work
+- Check Network tab for SSE connection
+- Verify `XAI_API_KEY` is set correctly
+- Check server logs for API errors
 
-## Setup Instructions
+### Explanation pane not opening
+- Ensure text is actually selected (not just clicked)
+- Check browser console for errors
+- Verify external APIs are accessible (Dictionary, Wikipedia)
 
-1. Clone the repository:
+### Build errors
+- Delete `node_modules` and run `npm install` again
+- Check Node.js version (18+ required)
+- Run `npm run lint:fix` to fix linting errors
 
-   ```
-   git clone <repository-url>
-   cd ai-ux-doubleclick
-   ```
+## 📚 Additional Resources
 
-2. Install dependencies for the client:
+- [xAI API Documentation](https://docs.x.ai)
+- [React Documentation](https://react.dev)
+- [Vite Documentation](https://vitejs.dev)
+- [Express Documentation](https://expressjs.com)
 
-   ```
-   cd client
-   npm install
-   ```
+## 🤝 Contributing
 
-3. Install dependencies for the server:
+Contributions are welcome! Please:
 
-   ```
-   cd server
-   npm install
-   ```
+1. Fork the repository
+2. Create a feature branch (`git checkout -b feature/amazing-feature`)
+3. Commit your changes (`git commit -m 'Add amazing feature'`)
+4. Push to the branch (`git push origin feature/amazing-feature`)
+5. Open a Pull Request
 
-4. Set up environment variables:
+## 📝 License
 
-   - For the **server**, copy `.env.example` to `.env` and add your `XAI_API_KEY`.
-   - For the **client**, copy `.env.example` to `.env` and set `VITE_API_URL=http://localhost:3001`.
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
 
-5. Start the server:
+## 🙏 Acknowledgments
 
-   ```
-   cd server
-   npm run dev
-   ```
+- Inspired by [Claude](https://claude.ai)'s clean interface
+- Powered by [xAI's Grok](https://x.ai) API
+- Dictionary data from [Free Dictionary API](https://dictionaryapi.dev)
+- Wikipedia summaries from [Wikipedia REST API](https://en.wikipedia.org/api/rest_v1/)
 
-6. In a separate terminal, start the client:
-   ```
-   cd client
-   npm run dev
-   ```
+## 📧 Support
 
-## Development
+For issues and questions:
+- Open an issue on GitHub
+- Check the [memory-bank/](memory-bank/) documentation
+- Review [DEPLOYMENT.md](DEPLOYMENT.md) for deployment help
 
-- **Server**: Runs on `http://localhost:3001` with hot-reload via `tsx`
-- **Client**: Runs on `http://localhost:3000` with Vite dev server
-- **Testing**: Run `npm run test:run` in the server directory to execute vitest
-- **Linting**: Run `npm run lint` in either directory to check code quality
+---
 
-## Usage
-
-- Open the application in your browser.
-- Interact with the chat by double-clicking on phrases to see additional information in the tooltip.
-
-## Contributing
-
-Contributions are welcome! Please submit a pull request or open an issue for any enhancements or bug fixes.
-
-## License
-
-This project is licensed under the MIT License.
+**Built with ❤️ using React, TypeScript, and xAI Grok**

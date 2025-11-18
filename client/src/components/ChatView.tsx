@@ -1,11 +1,13 @@
-import React, { useEffect, useRef, useState } from "react";
+import React, { useEffect, useRef, useState, lazy, Suspense } from "react";
 import useChatAPI from "../hooks/useChatAPI";
 import { usePopover } from "../hooks/usePopover";
 import { useChatManager } from "../hooks/useChatManager";
 import ChatInput from "./ChatInput";
 import MessageBubble from "./MessageBubble";
-import ExplanationPane from "./ExplanationPane";
 import LeftPane from "./LeftPane";
+
+// Lazy load ExplanationPane since it's only needed when user selects text
+const ExplanationPane = lazy(() => import("./ExplanationPane"));
 
 const ChatView: React.FC = () => {
   const chatManager = useChatManager();
@@ -16,11 +18,6 @@ const ChatView: React.FC = () => {
 
   const displayMessages = messages;
   const hasMessages = displayMessages.length > 0;
-
-  // Auto-scroll to bottom when new messages arrive
-  useEffect(() => {
-    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
-  }, [displayMessages]);
 
   // Save chat to history when messages change and it's a new conversation
   useEffect(() => {
@@ -126,7 +123,9 @@ const ChatView: React.FC = () => {
         </div>
       </div>
 
-      <ExplanationPane popover={popover} />
+      <Suspense fallback={<div className="explanation-pane"></div>}>
+        <ExplanationPane popover={popover} />
+      </Suspense>
     </div>
   );
 };

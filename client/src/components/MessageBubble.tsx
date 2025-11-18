@@ -29,8 +29,7 @@ const MessageBubble: React.FC<MessageBubbleProps> = ({
     const selectedText = selection?.toString().trim();
 
     if (!selectedText || selectedText.length === 0) {
-      // No text selected - close the popover
-      popover.hidePopover();
+      // No text selected - keep the pane open if already visible
       return;
     }
 
