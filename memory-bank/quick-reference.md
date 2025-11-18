@@ -172,35 +172,23 @@ NODE_ENV=production
 
 ## Deployment (Quick Version)
 
-### Option 1: Vercel All-in-One (Recommended)
+### Vercel Serverless (Recommended)
 
-**Everything to Vercel**:
-1. Push to GitHub
-2. Import to Vercel (zero config)
-3. Add env var: `XAI_API_KEY`
-4. Deploy! ✨
+```bash
+npm install      # Root dependencies for API
+git push         # Push to GitHub
+vercel           # Deploy
+# Add XAI_API_KEY in dashboard
+```
 
-**Zero cost, SSE streaming supported**
+**Free tier, zero config, SSE streaming supported**
 
-Full details in `VERCEL_DEPLOYMENT.md`.
+### Alternative: Vercel + Railway
 
-### Option 2: Vercel + Railway (Traditional)
+Frontend on Vercel, Backend on Railway (separate platforms).
+Railway no longer has free tier (~$5/month).
 
-**Frontend (Vercel)**:
-1. Connect GitHub repo
-2. Set root directory: `client`
-3. Add env var: `VITE_API_URL=<railway-url>`
-4. Deploy
-
-**Backend (Railway)**:
-1. Connect GitHub repo
-2. Set root directory: `server`
-3. Add env vars: `XAI_API_KEY`, `PORT=3001`, `NODE_ENV=production`
-4. Deploy
-
-**Note**: Railway no longer has free tier.
-
-Full details in `DEPLOYMENT.md`.
+**Full guide**: See `DEPLOYMENT.md`
 
 ## Common Questions
 

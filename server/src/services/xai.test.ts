@@ -87,12 +87,14 @@ describe("XAI/Grok Service", () => {
     expect(callArgs.model).toBe("grok-4-fast-reasoning");
     expect(callArgs.max_tokens).toBeUndefined(); // No token limit
     expect(callArgs.stream).toBe(true);
-    expect(callArgs.messages).toHaveLength(1); // Only user message, no system prompt
-    expect(callArgs.messages[0].role).toBe("user");
-    expect(callArgs.messages[0].content).toBe("What is chain-of-thought reasoning?");
+    expect(callArgs.messages).toHaveLength(2); // System message for LaTeX + user message
+    expect(callArgs.messages[0].role).toBe("system");
+    expect(callArgs.messages[0].content).toContain("LaTeX");
+    expect(callArgs.messages[1].role).toBe("user");
+    expect(callArgs.messages[1].content).toBe("What is chain-of-thought reasoning?");
   });
 
-  it("should not include a system prompt for default Grok behavior", async () => {
+  it("should include a system prompt for LaTeX formatting", async () => {
     const mockAsyncIterator = {
       [Symbol.asyncIterator]: async function* () {
         yield { choices: [{ delta: {} }] };
@@ -110,9 +112,11 @@ describe("XAI/Grok Service", () => {
       clientMock.chat.completions.create as ReturnType<typeof vi.fn>
     ).mock.calls[0][0];
 
-    // No system message - just the user message
-    expect(callArgs.messages).toHaveLength(1);
-    expect(callArgs.messages[0].role).toBe("user");
-    expect(callArgs.messages[0].content).toBe("Tell me about dogs");
+    // System message for LaTeX formatting + user message
+    expect(callArgs.messages).toHaveLength(2);
+    expect(callArgs.messages[0].role).toBe("system");
+    expect(callArgs.messages[0].content).toContain("LaTeX");
+    expect(callArgs.messages[1].role).toBe("user");
+    expect(callArgs.messages[1].content).toBe("Tell me about dogs");
   });
 });

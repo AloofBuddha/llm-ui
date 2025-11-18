@@ -190,45 +190,28 @@ npm run lint:fix   # Fix linting errors
 
 ## 🚢 Deployment
 
-### Option 1: Vercel All-in-One (Recommended) ⚡
+Two deployment options available - see **[DEPLOYMENT.md](DEPLOYMENT.md)** for complete guide.
 
-Deploy **both frontend and backend** to Vercel using serverless functions. **Zero cost, zero config!**
+### Vercel Serverless (Recommended) ⚡
 
-See **[VERCEL_DEPLOYMENT.md](VERCEL_DEPLOYMENT.md)** for detailed instructions.
+Deploy both frontend and backend to Vercel. **Free, zero config**.
 
-**Quick Deploy**:
-1. Push to GitHub
-2. Import to Vercel
-3. Add `XAI_API_KEY` environment variable
-4. Deploy! ✨
+```bash
+npm install           # Install API dependencies
+git push              # Push to GitHub
+vercel                # Import and deploy
+# Add XAI_API_KEY environment variable in dashboard
+```
 
-**Benefits**:
-- Everything in one place
-- Free tier (100GB-hrs/month)
-- SSE streaming supported
-- Global edge network
+**Benefits**: Everything in one place • Free tier • SSE streaming • No CORS
 
-### Option 2: Vercel + Railway (Traditional)
+### Vercel + Railway (Traditional)
 
-Deploy frontend to Vercel and backend to Railway separately.
+Separate frontend (Vercel) and backend (Railway) deployments.
 
-See **[DEPLOYMENT.md](DEPLOYMENT.md)** for detailed instructions.
+**Note**: Railway no longer has free tier (~$5/month).
 
-**Quick Deploy**:
-
-1. **Backend to Railway**:
-   - Connect GitHub repo
-   - Set root directory: `server`
-   - Add `XAI_API_KEY` environment variable
-   - Deploy
-
-2. **Frontend to Vercel**:
-   - Connect GitHub repo
-   - Set root directory: `client`
-   - Add `VITE_API_URL` with Railway URL
-   - Deploy
-
-**Note**: Railway no longer offers a free tier.
+See **[DEPLOYMENT.md](DEPLOYMENT.md)** for detailed instructions for both options.
 
 ## 🧪 Testing
 
