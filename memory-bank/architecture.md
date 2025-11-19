@@ -2,6 +2,8 @@
 
 ## System Architecture
 
+**Deployment**: Vercel Serverless (no separate backend server)
+
 ```
 ┌─────────────────────────────────────────────────────────────┐
 │                         Browser                              │
@@ -23,34 +25,40 @@
 │  │  └────────────────────────────────────────────────┘   │ │
 │  └────────────────────────────────────────────────────────┘ │
 │                           │                                  │
-│                           │ HTTP/SSE                         │
+│                           │ HTTP/SSE (same-origin)           │
 │                           ▼                                  │
 └───────────────────────────────────────────────────────────────┘
                             │
-                            │ CORS-enabled
+                            │ No CORS needed
                             │
 ┌───────────────────────────▼───────────────────────────────────┐
-│                    Express Server                             │
+│              Vercel Serverless Functions                      │
 │  ┌────────────────────────────────────────────────────────┐  │
-│  │                  API Routes                            │  │
-│  │  - POST /api/chat      (main chat)                     │  │
-│  │  - POST /api/explain   (explanations)                  │  │
+│  │                  API Functions                         │  │
+│  │  - api/chat.ts         (main chat)                     │  │
+│  │  - api/explain.ts      (explanations)                  │  │
 │  └────────────────────────────────────────────────────────┘  │
 │                           │                                   │
 │  ┌────────────────────────▼───────────────────────────────┐  │
-│  │              Services Layer                            │  │
-│  │  - xai.ts (Grok API integration)                       │  │
+│  │              Shared Utils                              │  │
+│  │  - api/utils/xai.ts (Grok API integration)             │  │
 │  └────────────────────────────────────────────────────────┘  │
 │                           │                                   │
 └───────────────────────────┼───────────────────────────────────┘
                             │
                             │ HTTPS
                             ▼
-                   ┌─────────────────┐
-                   │   xAI Grok API  │
-                   │  (grok-4-fast)  │
-                   └─────────────────┘
+                   ┌──────────────────────────┐
+                   │    xAI Grok API          │
+                   │  (grok-4-fast-reasoning) │
+                   └──────────────────────────┘
 ```
+
+**Key Architectural Change** (as of 2025):
+- **Removed**: Separate Express server
+- **Now**: Vercel serverless functions for API
+- **Local Dev**: `vercel dev` runs both client and API locally
+- **Production**: Single Vercel deployment, no CORS needed
 
 ## Data Flow
 
@@ -73,7 +81,7 @@ useChatAPI.sendMessage()
 POST /api/chat
       │
       ▼
-server/routes/chat.ts
+api/chat.ts (serverless function)
       │
       ├─> Validate request
       │
@@ -132,7 +140,7 @@ Tab-specific API call:
       └─> AI: POST /api/explain (SSE stream)
             │
             ▼
-      server/routes/chat.ts (explain endpoint)
+      api/explain.ts (serverless function)
             │
             ▼
       xaiService.streamExplanation()

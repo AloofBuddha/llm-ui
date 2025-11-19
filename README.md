@@ -4,7 +4,7 @@ A Claude-inspired chat interface for interacting with xAI's Grok API, featuring 
 
 [![TypeScript](https://img.shields.io/badge/TypeScript-5.2-blue)](https://www.typescriptlang.org/)
 [![React](https://img.shields.io/badge/React-18.3-blue)](https://reactjs.org/)
-[![Express](https://img.shields.io/badge/Express-4.21-green)](https://expressjs.com/)
+[![Vercel](https://img.shields.io/badge/Vercel-Serverless-black)](https://vercel.com/)
 [![License](https://img.shields.io/badge/license-MIT-green)](LICENSE)
 
 ## ✨ Features
@@ -39,6 +39,7 @@ A Claude-inspired chat interface for interacting with xAI's Grok API, featuring 
 ### Prerequisites
 - Node.js 18+ and npm
 - xAI API key ([Get one here](https://console.x.ai/))
+- Vercel CLI (for local development)
 
 ### Installation
 
@@ -50,41 +51,42 @@ A Claude-inspired chat interface for interacting with xAI's Grok API, featuring 
 
 2. **Install dependencies**
    ```bash
-   # Install both client and server dependencies
+   # Install root dependencies (API functions)
+   npm install
+
+   # Install client dependencies
    cd client && npm install
-   cd ../server && npm install
+   cd ..
    ```
 
 3. **Set up environment variables**
 
-   **Server** (`server/.env`):
+   **Root** (`.env`):
    ```bash
    XAI_API_KEY=your_xai_api_key_here
-   PORT=3001
    ```
 
-   **Client** (`client/.env`):
+   **Client** (`client/.env`) - *Optional, for standalone client dev*:
    ```bash
    VITE_API_URL=http://localhost:3001
    ```
 
-4. **Start development servers**
-
-   **Terminal 1 - Backend**:
+4. **Install Vercel CLI** (if not already installed)
    ```bash
-   cd server
-   npm run dev
+   npm install -g vercel
    ```
 
-   **Terminal 2 - Frontend**:
+5. **Start development server**
    ```bash
-   cd client
    npm run dev
+   # This runs 'vercel dev' which starts both client and API locally
+   # Client: http://localhost:3000
+   # API: http://localhost:3000/api/*
    ```
 
-5. **Open the app**
+6. **Open the app**
 
-   Visit [http://localhost:5173](http://localhost:5173) in your browser
+   Visit [http://localhost:3000](http://localhost:3000) in your browser
 
 ## 📁 Project Structure
 
@@ -107,16 +109,11 @@ llm-ui/
 │   │   └── types.ts            # TypeScript types
 │   └── package.json
 │
-├── server/                      # Express backend
-│   ├── src/
-│   │   ├── routes/
-│   │   │   └── chat.ts                # API endpoints (/api/chat, /api/explain)
-│   │   ├── services/
-│   │   │   └── xai.ts                 # xAI Grok integration
-│   │   ├── config/
-│   │   │   └── env.ts                 # Environment config
-│   │   └── index.ts                   # Express server setup
-│   └── package.json
+├── api/                         # Vercel serverless functions
+│   ├── chat.ts                         # /api/chat endpoint (SSE streaming)
+│   ├── explain.ts                      # /api/explain endpoint (SSE streaming)
+│   └── utils/
+│       └── xai.ts                      # xAI Grok integration (shared logic)
 │
 ├── memory-bank/                 # Project documentation for context
 │   ├── project-overview.md            # High-level overview
@@ -124,8 +121,10 @@ llm-ui/
 │   ├── feature-details.md             # Implementation details
 │   └── quick-reference.md             # Quick reference guide
 │
+├── vercel.json                  # Vercel deployment configuration
 ├── CLAUDE.md                    # Instructions for Claude Code
-├── DEPLOYMENT.md                # Deployment guide (Vercel + Railway)
+├── DEPLOYMENT.md                # Deployment guide (Vercel)
+├── package.json                 # Root package (API dependencies)
 └── README.md                    # This file
 ```
 
@@ -152,23 +151,18 @@ llm-ui/
 
 ### Available Scripts
 
-#### Client
+#### Root (Development)
 ```bash
-npm run dev        # Start Vite dev server
-npm run build      # Build for production
-npm run preview    # Preview production build
-npm run lint       # Run ESLint
-npm run lint:fix   # Fix linting errors
+npm run dev        # Start Vercel dev server (client + API)
+npm run build      # Build client for production
 ```
 
-#### Server
+#### Client
 ```bash
-npm run dev        # Start with hot-reload (tsx)
-npm run build      # Compile TypeScript
-npm start          # Run production build
-npm run test       # Run tests in watch mode
-npm run test:run   # Run tests once
-npm run test:ui    # Run tests with UI
+cd client
+npm run dev        # Start Vite dev server (standalone)
+npm run build      # Build for production
+npm run preview    # Preview production build
 npm run lint       # Run ESLint
 npm run lint:fix   # Fix linting errors
 ```
@@ -183,51 +177,39 @@ npm run lint:fix   # Fix linting errors
 - Pure CSS (no framework)
 
 **Backend**
-- Express + TypeScript
+- Vercel Serverless Functions
 - OpenAI SDK (for xAI API)
 - Server-Sent Events (SSE)
-- Vitest (testing)
+- TypeScript
 
 ## 🚢 Deployment
 
-Two deployment options available - see **[DEPLOYMENT.md](DEPLOYMENT.md)** for complete guide.
+Deployed to **Vercel** using serverless functions. See **[DEPLOYMENT.md](DEPLOYMENT.md)** for complete guide.
 
-### Vercel Serverless (Recommended) ⚡
+### Quick Deploy to Vercel ⚡
 
-Deploy both frontend and backend to Vercel. **Free, zero config**.
+1. **Push to GitHub**
+   ```bash
+   git push
+   ```
 
-```bash
-npm install           # Install API dependencies
-git push              # Push to GitHub
-vercel                # Import and deploy
-# Add XAI_API_KEY environment variable in dashboard
-```
+2. **Import to Vercel**
+   - Go to [vercel.com](https://vercel.com)
+   - Click "Import Project"
+   - Select your GitHub repository
 
-**Benefits**: Everything in one place • Free tier • SSE streaming • No CORS
+3. **Add Environment Variable**
+   - In Vercel dashboard, go to Settings → Environment Variables
+   - Add `XAI_API_KEY` with your xAI API key
+   - Set for "Production" environment
 
-### Vercel + Railway (Traditional)
+4. **Deploy**
+   - Vercel automatically deploys on every push to main branch
+   - View your live site at your Vercel URL
 
-Separate frontend (Vercel) and backend (Railway) deployments.
+**Benefits**: Everything in one place • Free tier • SSE streaming • No CORS • Auto-deploy on push
 
-**Note**: Railway no longer has free tier (~$5/month).
-
-See **[DEPLOYMENT.md](DEPLOYMENT.md)** for detailed instructions for both options.
-
-## 🧪 Testing
-
-Server includes comprehensive tests:
-
-```bash
-cd server
-npm run test:run     # Run all tests
-npm run test:ui      # Run with UI
-```
-
-Current test coverage:
-- ✅ xAI service integration
-- ✅ Chat route handlers
-- ✅ SSE streaming
-- ✅ Error handling
+See **[DEPLOYMENT.md](DEPLOYMENT.md)** for detailed instructions.
 
 ## 📖 API Documentation
 
@@ -267,13 +249,12 @@ Contextual explanation endpoint.
 
 ### Changing the AI Model
 
-Edit `server/src/services/xai.ts`:
+Edit `api/utils/xai.ts`:
 ```typescript
-const completion = await openai.chat.completions.create({
-  model: "grok-4-fast",  // Change this
-  messages,
+const stream = await client.chat.completions.create({
+  model: "grok-4-fast-reasoning",  // Change this
   stream: true,
-  max_tokens: 300,       // Adjust as needed
+  messages,
 });
 ```
 
@@ -293,17 +274,15 @@ All styles are in `client/src/styles/`:
 
 ## 🔐 Environment Variables
 
-### Client
-| Variable | Description | Default |
-|----------|-------------|---------|
-| `VITE_API_URL` | Backend API URL | `http://localhost:3001` |
-
-### Server
+### Root (API Functions)
 | Variable | Description | Required |
 |----------|-------------|----------|
 | `XAI_API_KEY` | xAI API key | ✅ Yes |
-| `PORT` | Server port | No (defaults to 3001) |
-| `NODE_ENV` | Environment | No (defaults to development) |
+
+### Client (Optional)
+| Variable | Description | Default |
+|----------|-------------|---------|
+| `VITE_API_URL` | API URL for standalone dev | `""` (uses same-origin) |
 
 ## 🐛 Troubleshooting
 

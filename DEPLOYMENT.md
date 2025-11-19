@@ -1,20 +1,16 @@
 # Deployment Guide
 
-Deploy your LLM UI application to production. Choose between two options:
-
-1. **Vercel All-in-One** (Recommended) - Deploy both frontend and backend to Vercel using serverless functions. **Free tier, zero config**.
-2. **Vercel + Railway** (Traditional) - Separate deployments for frontend and backend.
+Deploy your LLM UI application to Vercel using serverless functions. **Free tier, zero config**.
 
 ## Prerequisites
 
 - GitHub account
 - xAI API key ([Get one here](https://console.x.ai/))
 - Vercel account ([Sign up](https://vercel.com))
-- Railway account (only if using Option 2)
 
 ---
 
-## Option 1: Vercel Serverless (Recommended) ⚡
+## Vercel Serverless Deployment ⚡
 
 Deploy everything to one platform with zero cost and zero configuration.
 
@@ -28,14 +24,7 @@ Deploy everything to one platform with zero cost and zero configuration.
 
 ### Quick Start (5 Minutes)
 
-#### 1. Install Dependencies
-
-```bash
-# Install root dependencies (for API functions)
-npm install
-```
-
-#### 2. Push to GitHub
+#### 1. Push to GitHub
 
 ```bash
 git add .
@@ -43,7 +32,7 @@ git commit -m "Ready for deployment"
 git push origin main
 ```
 
-#### 3. Deploy to Vercel
+#### 2. Deploy to Vercel
 
 **Via Vercel Dashboard**:
 
@@ -61,7 +50,7 @@ git push origin main
    - Click "Environment Variables"
    - Name: `XAI_API_KEY`
    - Value: Your xAI API key
-   - Available to: **All environments**
+   - Available to: **Production**
 
 5. **Deploy**:
    - Click "Deploy"
@@ -88,7 +77,7 @@ vercel env add XAI_API_KEY production
 vercel --prod
 ```
 
-#### 4. Test Your Deployment
+#### 3. Test Your Deployment
 
 1. Visit your Vercel URL (e.g., `https://llm-ui.vercel.app`)
 2. Send a chat message
@@ -120,72 +109,78 @@ https://your-app.vercel.app/api/explain → Explain API
 
 ### Local Development
 
-**Option A: Express Server (Recommended)**
-
-Use your existing Express server for development (faster, no cold starts):
-
-```bash
-# Terminal 1 - Backend
-cd server && npm run dev
-
-# Terminal 2 - Frontend
-cd client && npm run dev
-```
-
-**Option B: Vercel Dev (Test Serverless Locally)**
-
-Test serverless functions locally:
+Use **Vercel CLI** to test locally (matches production environment):
 
 ```bash
 # Create .env at project root
-cp .env.example .env
-# Add your XAI_API_KEY
+echo "XAI_API_KEY=your_api_key_here" > .env
 
-# Install Vercel CLI
+# Install Vercel CLI globally
 npm install -g vercel
 
-# Start Vercel dev server
-vercel dev
+# Start dev server (runs both client and API)
+npm run dev
+# Client: http://localhost:3000
+# API: http://localhost:3000/api/*
 ```
+
+This runs `vercel dev` which:
+- Serves your client from `client/`
+- Runs API functions from `api/` as serverless functions locally
+- Matches production behavior exactly
 
 ### Environment Variables
 
 **Production** (Vercel Dashboard → Settings → Environment Variables):
 
-| Variable      | Value            |
-| ------------- | ---------------- |
-| `XAI_API_KEY` | Your xAI API key |
+| Variable      | Value            | Required |
+| ------------- | ---------------- | -------- |
+| `XAI_API_KEY` | Your xAI API key | ✅ Yes   |
 
-**Local** (for Vercel Dev only - create `.env` at project root):
+**Local** (`.env` at project root):
 
 ```bash
 XAI_API_KEY=your_xai_api_key_here
 ```
 
-**Note**: Client and server folders have their own `.env` files for Express development.
-
 ### Serverless Functions Configuration
 
-Edit `vercel.json` to customize:
+Edit `vercel.json` to customize function behavior:
 
 ```json
 {
+  "buildCommand": "cd client && npm install && npm run build",
+  "outputDirectory": "client/dist",
+  "framework": "vite"
+}
+```
+
+**Optional advanced configuration**:
+
+```json
+{
+  "buildCommand": "cd client && npm install && npm run build",
+  "outputDirectory": "client/dist",
+  "framework": "vite",
   "functions": {
     "api/**/*.ts": {
-      "memory": 1024, // Memory in MB
-      "maxDuration": 10 // Timeout in seconds (Free: 10s, Pro: 60s)
+      "memory": 1024,
+      "maxDuration": 10
     }
   }
 }
 ```
 
+- `memory`: Function memory in MB (default: 1024)
+- `maxDuration`: Timeout in seconds (Free: 10s, Pro: 60s)
+
 ### Monitoring & Logs
 
 **View Logs**:
 
-1. Vercel Dashboard → Your Project → Deployments
-2. Click a deployment → Functions tab
-3. Click function name to see logs
+1. Vercel Dashboard → Your Project
+2. Click "Logs" tab in top navigation
+3. See real-time function execution logs
 
 **CLI**:
 
@@ -196,18 +191,29 @@ vercel logs --follow  # Real-time
 
 ### Troubleshooting
 
-**Function Timeout**:
+**Build Failures**:
+- Check that `vercel.json` points to correct output directory
+- Verify `npm run build` works locally
+- Check build logs in Vercel dashboard
 
+**Function Errors (500)**:
+- Check Logs tab for error messages
+- Common: Missing `XAI_API_KEY` environment variable
+- Verify TypeScript imports use `.js` extensions
+
+**Module Not Found Errors**:
+- API function imports must use `.js` extension
+- Example: `import { streamChat } from "./utils/xai.js"`
+
+**Function Timeout**:
 - Reduce `max_tokens` in API requests
 - Upgrade to Vercel Pro for 60s timeout
 
 **Environment Variable Not Found**:
-
 - Verify `XAI_API_KEY` is set in Vercel dashboard
-- Redeploy after adding environment variables
+- Redeploy after adding environment variables (automatic on git push)
 
 **SSE Not Streaming**:
-
 - Check Network tab for `text/event-stream` header
 - Verify chunks are being sent in Vercel logs
 
@@ -218,6 +224,7 @@ vercel logs --follow  # Real-time
 - 100GB-hrs function execution/month
 - 100GB bandwidth/month
 - Unlimited builds
+- 10s function timeout
 
 **Typical Usage for This App**:
 
@@ -225,117 +232,6 @@ vercel logs --follow  # Real-time
 - Bandwidth: ~5-20 GB/month
 
 **Result**: **$0/month** for personal/development use
-
----
-
-## Option 2: Vercel + Railway (Traditional)
-
-Deploy frontend to Vercel and backend to Railway as separate services.
-
-**Note**: Railway no longer offers a free tier (~$5/month minimum).
-
-### Backend Deployment (Railway)
-
-#### 1. Prepare Repository
-
-```bash
-git add .
-git commit -m "Prepare for deployment"
-git push origin main
-```
-
-#### 2. Deploy to Railway
-
-1. **Sign in**: Visit https://railway.app (sign in with GitHub)
-
-2. **Create Project**:
-
-   - Click "New Project"
-   - Select "Deploy from GitHub repo"
-   - Choose your repository
-
-3. **Configure**:
-
-   - Set **Root Directory**: `server`
-   - Build Command: `npm install && npm run build`
-   - Start Command: `npm start`
-
-4. **Environment Variables**:
-
-   - `XAI_API_KEY`: Your xAI API key
-   - `PORT`: `3001`
-   - `NODE_ENV`: `production`
-
-5. **Deploy**: Railway deploys automatically
-
-6. **Get URL**: Copy your Railway URL (e.g., `https://your-app.up.railway.app`)
-
-### Frontend Deployment (Vercel)
-
-#### 1. Update Environment Variable
-
-Create `client/.env.production`:
-
-```bash
-VITE_API_URL=https://your-railway-app.up.railway.app
-```
-
-Commit and push:
-
-```bash
-git add client/.env.production
-git commit -m "Add production API URL"
-git push
-```
-
-#### 2. Deploy to Vercel
-
-1. Go to https://vercel.com/new
-2. Import your repository
-3. **Configure**:
-
-   - Framework: Vite
-   - Root Directory: `client`
-   - Build Command: `npm run build`
-   - Output Directory: `dist`
-
-4. **Environment Variable**:
-
-   - `VITE_API_URL`: Your Railway backend URL
-
-5. Deploy!
-
-### CORS Configuration
-
-Update `server/src/index.ts` to allow your Vercel domain:
-
-```typescript
-const corsOptions = {
-  origin:
-    process.env.NODE_ENV === "production"
-      ? "https://your-app.vercel.app"
-      : "http://localhost:5173",
-  credentials: true,
-};
-
-app.use(cors(corsOptions));
-```
-
-Commit and push to redeploy on Railway.
-
----
-
-## Comparison: Serverless vs Traditional
-
-| Feature         | Vercel Serverless    | Vercel + Railway  |
-| --------------- | -------------------- | ----------------- |
-| **Cost**        | **Free**             | ~$5/month         |
-| **Setup**       | One platform         | Two platforms     |
-| **CORS**        | Not needed           | Required          |
-| **Cold Starts** | 1-2s (first request) | None              |
-| **Maintenance** | Lower                | Higher            |
-| **Scalability** | Auto                 | Manual/Auto       |
-| **Best For**    | Personal/Small apps  | High-traffic apps |
 
 ---
 
@@ -347,7 +243,8 @@ Commit and push to redeploy on Railway.
 
 1. Settings → Domains
 2. Add your domain
-3. Configure DNS
+3. Configure DNS records
+4. Done! SSL automatic
 
 ### Analytics (Optional)
 
@@ -355,12 +252,28 @@ Add Vercel Analytics:
 
 1. Project Settings → Analytics
 2. Enable Analytics
-3. Add `<Analytics />` to your React app
+3. Add `@vercel/analytics` to your client
+
+```bash
+cd client
+npm install @vercel/analytics
+```
+
+Then in `client/src/main.tsx`:
+```typescript
+import { Analytics } from '@vercel/analytics/react';
+
+ReactDOM.createRoot(document.getElementById('root')!).render(
+  <React.StrictMode>
+    <App />
+    <Analytics />
+  </React.StrictMode>
+);
+```
 
 ### Monitoring (Optional)
 
 **Error Tracking**: Integrate Sentry or similar
-
 **Performance**: Use Vercel Speed Insights
 
 ---
@@ -383,28 +296,35 @@ After deployment, verify:
 
 ## Rollback
 
-### Vercel Serverless
-
 Redeploy previous version:
 
 1. Vercel Dashboard → Deployments
 2. Find previous deployment
 3. Click "⋯" → "Promote to Production"
 
-### Railway
+Or via CLI:
+```bash
+vercel rollback
+```
 
-Redeploy:
+---
 
-1. Railway Dashboard → Deployments
-2. Click previous deployment
-3. Click "Redeploy"
+## Continuous Deployment
+
+Vercel automatically deploys:
+
+- **Production**: Every push to `main` branch
+- **Preview**: Every pull request gets a unique preview URL
+
+To disable auto-deploy:
+1. Settings → Git
+2. Uncheck "Auto-deploy"
 
 ---
 
 ## Support
 
 - **Vercel Docs**: https://vercel.com/docs
-- **Railway Docs**: https://docs.railway.app
 - **xAI Docs**: https://docs.x.ai
 - **Issues**: Open issue on GitHub
 
@@ -412,37 +332,29 @@ Redeploy:
 
 ## Quick Reference
 
-### Vercel Serverless Commands
+### Vercel CLI Commands
 
 ```bash
-npm install               # Install API dependencies
-vercel                   # Deploy preview
-vercel --prod            # Deploy production
-vercel env add           # Add environment variable
-vercel logs              # View logs
-vercel dev               # Test locally
+npm install -g vercel     # Install CLI
+vercel login              # Authenticate
+vercel                    # Deploy preview
+vercel --prod             # Deploy production
+vercel env add            # Add environment variable
+vercel env ls             # List environment variables
+vercel logs               # View logs
+vercel logs --follow      # Real-time logs
+vercel dev                # Test locally (recommended for development)
+vercel rollback           # Rollback to previous deployment
 ```
 
-### Railway Commands
+### Environment Variables
 
-```bash
-npm install -g @railway/cli
-railway login
-railway link
-railway logs
-```
-
-### Environment Variables Summary
-
-**Vercel Serverless**:
-
+**Production** (Vercel Dashboard):
 - `XAI_API_KEY` (required)
 
-**Railway + Vercel**:
-
-- Backend: `XAI_API_KEY`, `PORT`, `NODE_ENV`
-- Frontend: `VITE_API_URL`
+**Local** (`.env` at root):
+- `XAI_API_KEY` (required)
 
 ---
 
-**That's it!** Choose your deployment option and you're ready to go live.🚀
+**That's it!** Your app is live on Vercel. 🚀
