@@ -85,7 +85,7 @@ const useChatAPI = (): UseChatAPIReturn => {
       let buffer = "";
       let accumulatedContent = "";
       let lastUpdateTime = Date.now();
-      const UPDATE_INTERVAL = 100; // Update UI every 100ms
+      const UPDATE_INTERVAL = 16; // Update UI every 16ms (~60fps)
 
       // eslint-disable-next-line no-constant-condition
       while (true) {

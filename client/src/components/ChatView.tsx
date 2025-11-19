@@ -24,7 +24,8 @@ const ChatView: React.FC = () => {
     if (messages.length > 0 && !isLoading) {
       chatManager.saveChat(messages);
     }
-  }, [messages, isLoading, chatManager]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [messages, isLoading]);
 
   const handleSendMessage = async (text: string) => {
     clearError();
