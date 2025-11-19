@@ -62,7 +62,7 @@ const useChatAPI = (): UseChatAPIReturn => {
     setMessages((prev) => [...prev, aiMessage]);
 
     try {
-      const apiUrl = import.meta.env.VITE_API_URL || "http://localhost:3001";
+      const apiUrl = import.meta.env.VITE_API_URL || "";
       const response = await fetch(`${apiUrl}/api/chat`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
